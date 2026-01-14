@@ -10,8 +10,9 @@ import SwiftUI
 @main
 struct ScreenableApp: App {
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        DocumentGroup(newDocument: ScreenableDocument()) { file in
+            ContentView(document: file.$document)
         }
+        .windowResizability(.contentSize)
     }
 }
