@@ -1,0 +1,17 @@
+//
+//  ScreenableApp.swift
+//  Screenable
+//
+//  Created by Weerawut on 14/1/2569 BE.
+//
+
+import SwiftUI
+
+@main
+struct ScreenableApp: App {
+    var body: some Scene {
+        WindowGroup {
+            ContentView()
+        }
+    }
+}
