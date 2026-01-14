@@ -14,5 +14,13 @@ struct ScreenableApp: App {
             ContentView(document: file.$document)
         }
         .windowResizability(.contentSize)
+        .commands {
+            CommandGroup(after: .saveItem) {
+                Button("Export...") {
+                    NSApp.sendAction(#selector(AppCommands.export), to: nil, from: nil)
+                }
+                .keyboardShortcut("e")
+            }
+        }
     }
 }
