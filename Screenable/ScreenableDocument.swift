@@ -15,6 +15,7 @@ struct ScreenableDocument: FileDocument, Codable {
     var font = "Helvetica Neue"
     var fontSize = 16
     var backgroundImage = ""
+    var userBackgroundImage: Data?
     var userImage: Data?
     var captionColor = Color.black
     var backgroundColorTop = Color.clear

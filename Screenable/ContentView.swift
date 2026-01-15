@@ -12,6 +12,7 @@ struct ContentView: View {
     @Binding var document: ScreenableDocument
     let fonts = Bundle.main.loadStringArray(from: "Fonts.txt")
     let backgrounds = Bundle.main.loadStringArray(from: "Backgrounds.txt")
+    @State private var showImporter = false
     
     var body: some View {
         HStack(spacing: 20) {
@@ -49,13 +50,24 @@ struct ContentView: View {
                 VStack(alignment: .leading) {
                     Text("Background image")
                         .bold()
-                    Picker("Background images", selection: $document.backgroundImage) {
-                        Text("No Background")
-                            .tag("")
-                        Divider()
-                        ForEach(backgrounds, id: \.self) {
-                            Text($0)
-                                .tag($0)
+                    
+                    HStack {
+                        Picker("Background images", selection: $document.backgroundImage) {
+                            Text("No Background")
+                                .tag("")
+                            Divider()
+                            ForEach(backgrounds, id: \.self) {
+                                Text($0)
+                                    .tag($0)
+                            }
+                        }
+                        .onChange(of: document.backgroundImage) { _, _ in
+                            document.userBackgroundImage = nil
+                        }
+                        
+                        Button("Choose") {
+                            document.backgroundImage = ""
+                            showImporter = true
                         }
                     }
                 }
@@ -97,12 +109,36 @@ struct ContentView: View {
             Button("Export", action: export)
             ShareLink(item: snapshotToURL())
         }
+        .fileImporter(isPresented: $showImporter, allowedContentTypes: [.png,.jpeg], allowsMultipleSelection: false) { result in
+            switch result {
+            case .success(let urls):
+                handleSelectImage(of: urls)
+            case .failure(let error):
+                print(error.localizedDescription)
+            }
+        }
     }
     
-    func handleDrop(of urls: [URL]) -> Bool {
-        guard let url = urls.first else { return false }
+    func handleSelectImage(of urls: [URL]) {
+        guard let url = urls.first else { return }
+        let didStartAccessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if didStartAccessing {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+        
+        do {
+            document.userBackgroundImage = try Data(contentsOf: url)
+            print("Loaded image data: \(document.userBackgroundImage!.count) bytes")
+        } catch {
+            print("Failed to load image:", error)
+        }
+    }
+    
+    func handleDrop(of urls: [URL]) {
+        guard let url = urls.first else { return }
         document.userImage = try? Data(contentsOf: url)
-        return true
     }
     
     func snapshotToURL() -> URL {

@@ -20,10 +20,18 @@ struct RenderView: View {
             // draw the background image
             context.fill(fullSizePath, with: .color(.white))
             if !document.backgroundImage.isEmpty {
+//                document.userBackgroundImage = nil
                 context.draw(Image(document.backgroundImage), in: fullSizeRect)
             }
+            
+            if document.userBackgroundImage != nil, let userBGImage = context.resolveSymbol(id: "BackgroundImage") {
+//                document.backgroundImage = ""
+                context.draw(userBGImage, in: fullSizeRect)
+            }
+            
             // add a gradient
             context.fill(fullSizePath, with: .linearGradient(Gradient(colors: [document.backgroundColorTop, document.backgroundColorBottom]), startPoint: .zero, endPoint: CGPoint(x: 0, y: size.height)))
+            
             // draw the caption
             var verticalOffset = 0.0
             let horizontalOffset = (size.width - phoneSize.width) / 2
@@ -70,13 +78,21 @@ struct RenderView: View {
                 Color.gray
                     .tag("Image")
             }
+            
+            if let userBackgroundImageData = document.userBackgroundImage, let nsImage = NSImage(data: userBackgroundImageData) {
+                Image(nsImage: nsImage)
+                    .resizable()
+                    .scaledToFill()
+                    .tag("BackgroundImage")
+            } else {
+                Color.blue
+                    .tag("BackgroundImage")
+            }
         }
         .frame(width: 414, height: 736)
     }
 }
 
 #Preview {
-    var document = ScreenableDocument()
-    document.caption = "Hello, RenderView!"
-    return RenderView(document: document)
+    RenderView(document: ScreenableDocument())
 }
